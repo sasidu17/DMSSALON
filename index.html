@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="si" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMS Luxe Salon - නවීන සුන්දරත්වය</title>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"> 
+    
+    <style>
+        /* Custom Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif; /* Modern font */
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); } /* Reduced float intensity */
+            100% { transform: translateY(0px); }
+        }
+        .float-animation { animation: float 5s ease-in-out infinite; }
+
+        /* Simple fade-in for sections (Can be enhanced with JS later) */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Gradient Text Utility */
+        .gradient-text {
+          background: linear-gradient(to right, #ec4899, #a855f7); /* Pink to Purple */
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+
+        /* Glassmorphism effect for cards/nav */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.6); /* Adjust opacity as needed */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Placeholder Styling */
+        .image-placeholder {
+            @apply w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 rounded-lg text-sm;
+        }
+        .icon-placeholder {
+            @apply w-16 h-16 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center text-pink-500 mb-4;
+        }
+
+        /* Custom Scrollbar (Optional) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px;}
+        ::-webkit-scrollbar-thumb:hover { background: #d0307f; }
+        
+    </style>
+</head>
+<body class="bg-gradient-to-b from-purple-50 via-pink-50 to-slate-50 text-gray-800 relative overflow-x-hidden">
+
+    <div id="threejs-canvas" class="fixed top-0 left-0 w-full h-full -z-10 opacity-20 pointer-events-none"></div>
+
+    <header x-data="{ mobileMenuOpen: false }" class="fixed w-full bg-white/80 backdrop-blur-lg shadow-lg z-50 border-b border-white/20">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="#home" class="flex items-center space-x-2 group cursor-pointer">
+                    <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full transform group-hover:rotate-[360deg] transition-transform duration-500 ease-in-out"></div>
+                    <span class="text-2xl font-bold gradient-text">DMS Luxe</span>
+                </a>
+                
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="#home" class="nav-link relative group text-gray-600 hover:text-pink-600 transition duration-300">මුල් පිටුව<span class="absolute bottom-0 left-0 w-full h-0.5 bg-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></a>
+                    <a href="#services" class="nav-link relative group text-gray-600 hover:text-pink-600 transition duration-300">සේවා<span class="absolute bottom-0 left-0 w-full h-0.5 bg-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></a>
+                    <a href="#experience" class="nav-link relative group text-gray-600 hover:text-pink-600 transition duration-300">අත්දැකීම<span class="absolute bottom-0 left-0 w-full h-0.5 bg-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></a>
+                    <a href="#gallery" class="nav-link relative group text-gray-600 hover:text-pink-600 transition duration-300">ගැලරිය<span class="absolute bottom-0 left-0 w-full h-0.5 bg-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></a>
+                     <a href="#profile" class="nav-link relative group text-gray-600 hover:text-pink-600 transition duration-300">ඔබේ විලාසිතාව<span class="absolute bottom-0 left-0 w-full h-0.5 bg-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></a>
+                    <a href="#contact" class="nav-link relative group text-gray-600 hover:text-pink-600 transition duration-300">සම්බන්ධ වන්න<span class="absolute bottom-0 left-0 w-full h-0.5 bg-pink-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span></a>
+                </div>
+
+                <div class="hidden lg:flex">
+                     <a href="#booking" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition duration-300">
+                        වේලාවක් වෙන්කරන්න
+                     </a>
+                 </div>
+
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden text-gray-600 hover:text-pink-500 transition">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </nav>
+
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-4"
+             class="lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-xl py-4 border-t border-gray-200/50"
+             @click.away="mobileMenuOpen = false">
+            <div class="flex flex-col items-center space-y-4 px-6">
+                <a href="#home" @click="mobileMenuOpen = false" class="block w-full text-center py-2 text-gray-700 hover:bg-pink-100/50 hover:text-pink-600 rounded transition duration-200">මුල් පිටුව</a>
+                <a href="#services" @click="mobileMenuOpen = false" class="block w-full text-center py-2 text-gray-700 hover:bg-pink-100/50 hover:text-pink-600 rounded transition duration-200">සේවා</a>
+                <a href="#experience" @click="mobileMenuOpen = false" class="block w-full text-center py-2 text-gray-700 hover:bg-pink-100/50 hover:text-pink-600 rounded transition duration-200">අත්දැකීම</a>
+                <a href="#gallery" @click="mobileMenuOpen = false" class="block w-full text-center py-2 text-gray-700 hover:bg-pink-100/50 hover:text-pink-600 rounded transition duration-200">ගැලරිය</a>
+                <a href="#profile" @click="mobileMenuOpen = false" class="block w-full text-center py-2 text-gray-700 hover:bg-pink-100/50 hover:text-pink-600 rounded transition duration-200">ඔබේ විලාසිතාව</a>
+                <a href="#contact" @click="mobileMenuOpen = false" class="block w-full text-center py-2 text-gray-700 hover:bg-pink-100/50 hover:text-pink-600 rounded transition duration-200">සම්බන්ධ වන්න</a>
+                <a href="#booking" @click="mobileMenuOpen = false" class="mt-4 w-full text-center bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-2 rounded-full hover:shadow-lg transform hover:scale-105 transition duration-300">
+                    වේලාවක් වෙන්කරන්න
+                 </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="min-h-screen flex items-center justify-center pt-32 pb-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
+            <div class="max-w-4xl mx-auto z-10">
+                <div class="float-animation space-y-8 md:space-y-12">
+                     <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+                         <span class="block gradient-text mb-2">DMS Luxe හිදී</span>
+                         <span class="block text-gray-700">ඔබේ සුන්දරත්වය <br class="sm:hidden"/>නැවත අර්ථ දක්වන්න</span>
+                     </h1>
+                     <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                        අති නවීන තාක්ෂණය සහ සුඛෝපභෝගී සත්කාර තුළින් අසමසම සුන්දරත්ව අත්දැකීමක් ලබා ගන්න.
+                     </p>
+                     <a href="#services" class="inline-block bg-gradient-to-r from-pink-500 to-purple-500 text-white px-10 py-3 rounded-full text-lg font-semibold hover:shadow-xl transform hover:scale-105 transition duration-300">
+                         අපගේ සේවාවන් ගවේෂණය කරන්න
+                     </a>
+                </div>
+            </div>
+             <div class="absolute top-1/4 left-10 w-32 h-32 bg-pink-200/30 rounded-full filter blur-2xl opacity-50 -z-1"></div>
+             <div class="absolute bottom-1/4 right-10 w-40 h-40 bg-purple-200/30 rounded-full filter blur-2xl opacity-50 -z-1"></div>
+        </section>
+
+        <section id="services" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto fade-in-section">
+                <div class="text-center mb-16 md:mb-20">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 gradient-text">අපගේ අති නවීන සේවාවන්</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">විශිෂ්ට ප්‍රතිඵල සඳහා නිර්මාණය කර ඇති අපගේ අත්සන සහිත සේවාවන් අත්විඳින්න.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+                    <div class="service-card glass-effect rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                         <div class="icon-placeholder"><i class="fas fa-cut text-3xl"></i></div>
+                         <h3 class="text-xl md:text-2xl font-bold mb-3 text-gray-800">AI හිසකෙස් නිර්මාණකරණය</h3>
+                         <p class="text-gray-600 mb-4 flex-grow">කෘතිම බුද්ධිය භාවිතයෙන් ඔබගේ මුහුණේ හැඩයට සහ විලාසිතාවට ගැලපෙනම කේශ විලාසිතාව සොයාගන්න.</p>
+                         <div class="image-placeholder mb-4"><span>සේවා රූපය මෙතනට</span></div>
+                         <a href="#booking" class="text-pink-600 font-semibold hover:underline">වැඩි විස්තර සහ වෙන්කරවා ගැනීම <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                    </div>
+                    <div class="service-card glass-effect rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                         <div class="icon-placeholder"><i class="fas fa-spa text-3xl"></i></div>
+                         <h3 class="text-xl md:text-2xl font-bold mb-3 text-gray-800">සමට ගැඹුරු සත්කාර</h3>
+                         <p class="text-gray-600 mb-4 flex-grow">ඔබේ සමේ වර්ගය විශ්ලේෂණය කර, පෞද්ගලිකව සකස් කළ සමේ සත්කාරක වැඩසටහන්.</p>
+                          <div class="image-placeholder mb-4"><span>සේවා රූපය මෙතනට</span></div>
+                         <a href="#booking" class="text-pink-600 font-semibold hover:underline">වැඩි විස්තර සහ වෙන්කරවා ගැනීම <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                    </div>
+                    <div class="service-card glass-effect rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                         <div class="icon-placeholder"><i class="fas fa-magic text-3xl"></i></div>
+                         <h3 class="text-xl md:text-2xl font-bold mb-3 text-gray-800">නැනෝ තාක්ෂණික වර්ණ ගැන්වීම</h3>
+                         <p class="text-gray-600 mb-4 flex-grow">කල් පවතින, දීප්තිමත් වර්ණ ලබා දෙන නවීන නැනෝ තාක්ෂණයෙන් කෙස් වර්ණ ගැන්වීම.</p>
+                         <div class="image-placeholder mb-4"><span>සේවා රූපය මෙතනට</span></div>
+                         <a href="#booking" class="text-pink-600 font-semibold hover:underline">වැඩි විස්තර සහ වෙන්කරවා ගැනීම <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                    </div>
+                    </div>
+            </div>
+        </section>
+        
+        <section id="experience" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-pink-50 to-purple-100/50">
+             <div class="max-w-7xl mx-auto fade-in-section">
+                <div class="text-center mb-16 md:mb-20">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 gradient-text">සුවිශේෂී DMS Luxe අත්දැකීම</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">අපගේ සැලෝනය හුදෙක් සේවාවක් ලබා දෙන ස්ථානයක් නොවේ. එය නවීන සුඛෝපභෝගීත්වයේ අත්දැකීමකි.</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                     <div class="space-y-6">
+                         <h3 class="text-2xl md:text-3xl font-bold text-gray-800">තාක්ෂණය සහ සුවපහසුව</h3>
+                         <p class="text-gray-600 leading-relaxed">අපි නවීනතම රූපලාවන්‍ය තාක්‍ෂණය, සන්සුන් සහ සුඛෝපභෝගී පරිසරයක් සමඟ ඒකාබද්ධ කරමු. සෑම අමුත්තෙකුටම පුද්ගලාරෝපිත අවධානයක් සහ සුවිශේෂී සත්කාරයක් ලැබෙන බවට අපි සහතික වෙමු.</p>
+                         <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-center"><i class="fas fa-check-circle text-pink-500 mr-3"></i> පුද්ගලික උපදේශන සැසි</li>
+                            <li class="flex items-center"><i class="fas fa-check-circle text-pink-500 mr-3"></i> සුවපහසු, නවීන සැලසුම්</li>
+                            <li class="flex items-center"><i class="fas fa-check-circle text-pink-500 mr-3"></i> උසස් තත්ත්වයේ නිෂ්පාදන</li>
+                         </ul>
+                         <a href="#booking" class="inline-block mt-4 text-pink-600 font-semibold hover:underline">අදම ඔබේ අත්දැකීම වෙන්කර ගන්න <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                     </div>
+                     <div>
+                         <div class="w-full h-80 lg:h-96 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 rounded-2xl shadow-lg">
+                             <span>සැලෝන් අභ්‍යන්තරය/අත්දැකීම් රූපය මෙතනට</span>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </section>
+
+        <section id="gallery" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto fade-in-section">
+                <div class="text-center mb-16 md:mb-20">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 gradient-text">අපගේ නිර්මාණ ගැලරිය</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">අපගේ දක්ෂ ශිල්පීන්ගේ නිර්මාණශීලීත්වය සහ ප්‍රතිඵල බලන්න.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="image-placeholder h-60 md:h-72 lg:h-80 group overflow-hidden rounded-lg">
+                        <span class="group-hover:scale-110 transition duration-300">ගැලරි රූපය 1</span>
+                    </div>
+                    <div class="image-placeholder h-60 md:h-72 lg:h-80 group overflow-hidden rounded-lg">
+                         <span class="group-hover:scale-110 transition duration-300">ගැලරි රූපය 2</span>
+                    </div>
+                    <div class="image-placeholder h-60 md:h-72 lg:h-80 group overflow-hidden rounded-lg">
+                         <span class="group-hover:scale-110 transition duration-300">ගැලරි රූපය 3</span>
+                    </div>
+                    <div class="image-placeholder h-60 md:h-72 lg:h-80 group overflow-hidden rounded-lg">
+                         <span class="group-hover:scale-110 transition duration-300">ගැලරි රූපය 4</span>
+                    </div>
+                    </div>
+                 <div class="text-center mt-12">
+                     <a href="#" class="inline-block bg-transparent border-2 border-pink-500 text-pink-500 px-8 py-3 rounded-full font-semibold hover:bg-pink-500 hover:text-white transition duration-300">
+                        සම්පූර්ණ ගැලරිය බලන්න
+                     </a>
+                 </div>
+            </div>
+        </section>
+
+        <section id="profile" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-purple-50 via-pink-50 to-slate-50">
+            <div class="max-w-7xl mx-auto fade-in-section">
+                <div class="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
+                    <div class="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-lg p-4 bg-white/50 backdrop-blur-sm border border-white/30">
+                        <p class="text-center text-gray-500 mb-2 text-sm">ඔබේ අද්විතීය සුන්දරත්ව පැතිකඩ</p>
+                        <div id="p5-visualization-canvas" class="w-full h-full">
+                            </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold gradient-text">ඔබේ අද්විතීය සුන්දරත්ව පැතිකඩ</h2>
+                        <p class="text-lg text-gray-600 leading-relaxed">
+                            අපගේ උසස් විශ්ලේෂණ පද්ධතිය, ඔබගේ පෞද්ගලික ලක්ෂණ (සමේ වර්ගය, හිසකෙස් ස්වභාවය, මුහුණේ හැඩය) සහ ඔබගේ කැමැත්ත සැලකිල්ලට ගෙන, ඔබට වඩාත්ම ගැලපෙන සේවාවන් සහ විලාසිතා නිර්දේශ කරයි.
+                        </p>
+                        <div class="space-y-4 pt-4">
+                            <h4 class="text-xl font-semibold text-gray-700">විශ්ලේෂණ අංග:</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="profile-element bg-white/70 p-4 rounded-lg shadow-sm border border-white/40 backdrop-blur-sm hover:bg-white transition">
+                                    <div class="text-pink-600 font-bold mb-1 text-sm"><i class="fas fa-palette mr-2"></i>සම වර්ගය සහ වර්ණය</div>
+                                    <div class="h-2 bg-purple-200 rounded-full"><div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full w-3/4"></div></div>
+                                </div>
+                                <div class="profile-element bg-white/70 p-4 rounded-lg shadow-sm border border-white/40 backdrop-blur-sm hover:bg-white transition">
+                                    <div class="text-pink-600 font-bold mb-1 text-sm"><i class="fas fa-stream mr-2"></i>කෙස් ස්වභාවය</div>
+                                     <div class="h-2 bg-purple-200 rounded-full"><div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full w-1/2"></div></div>
+                                </div>
+                                 <div class="profile-element bg-white/70 p-4 rounded-lg shadow-sm border border-white/40 backdrop-blur-sm hover:bg-white transition">
+                                    <div class="text-pink-600 font-bold mb-1 text-sm"><i class="fas fa-user-circle mr-2"></i>මුහුණේ හැඩය</div>
+                                     <div class="h-2 bg-purple-200 rounded-full"><div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full w-5/6"></div></div>
+                                </div>
+                                <div class="profile-element bg-white/70 p-4 rounded-lg shadow-sm border border-white/40 backdrop-blur-sm hover:bg-white transition">
+                                    <div class="text-pink-600 font-bold mb-1 text-sm"><i class="fas fa-star mr-2"></i>විලාසිතා මනාපය</div>
+                                     <div class="h-2 bg-purple-200 rounded-full"><div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full w-2/3"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                         <a href="#booking" class="inline-block mt-4 text-pink-600 font-semibold hover:underline">ඔබේ උපදේශනය වෙන්කර ගන්න <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+         <section id="testimonials" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto fade-in-section">
+                 <div class="text-center mb-16 md:mb-20">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 gradient-text">අපගේ සේවාදායකයින් පවසන දේ</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">සැබෑ පාරිභෝගිකයින්ගෙන් ලැබුණු ප්‍රතිචාර.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="testimonial-card glass-effect rounded-2xl p-6 md:p-8 shadow-lg relative">
+                         <i class="fas fa-quote-left text-pink-300 text-4xl absolute top-4 left-4 opacity-50"></i>
+                         <p class="text-gray-600 italic mb-4 mt-6">"DMS Luxe හි සේවාවන් අති විශිෂ්ටයි! ඔවුන් මගේ කොණ්ඩයට කරපු නිර්මාණයට මම ගොඩක් කැමතියි. කාර්ය මණ්ඩලයත් ඉතා මිත්‍රශීලීයි."</p>
+                         <div class="flex items-center">
+                             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 mr-4 flex items-center justify-center text-gray-500 text-xs">Avatar</div>
+                              <div>
+                                 <p class="font-bold text-gray-800">නිමාලි පෙරේරා</p>
+                                 <div class="text-yellow-400"> <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                    <div class="testimonial-card glass-effect rounded-2xl p-6 md:p-8 shadow-lg relative">
+                         <i class="fas fa-quote-left text-pink-300 text-4xl absolute top-4 left-4 opacity-50"></i>
+                         <p class="text-gray-600 italic mb-4 mt-6">"AI තාක්ෂණයෙන් මට ගැළපෙනම Haircut එක තෝරගන්න උදව් වුණා. ප්‍රතිඵලය ගැන ගොඩක් සතුටුයි. ස්තූතියි DMS Luxe!"</p>
+                         <div class="flex items-center">
+                              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 mr-4 flex items-center justify-center text-gray-500 text-xs">Avatar</div>
+                              <div>
+                                 <p class="font-bold text-gray-800">සඳුන් ජයවීර</p>
+                                 <div class="text-yellow-400">
+                                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                    <div class="testimonial-card glass-effect rounded-2xl p-6 md:p-8 shadow-lg relative">
+                         <i class="fas fa-quote-left text-pink-300 text-4xl absolute top-4 left-4 opacity-50"></i>
+                         <p class="text-gray-600 italic mb-4 mt-6">"ඉතාම පිරිසිදු, සුඛෝපභෝගී ස්ථානයක්. සමට කරපු සත්කාරයෙන් පසුව ලොකු වෙනසක් දැනෙනවා. Highly recommend!"</p>
+                         <div class="flex items-center">
+                              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 mr-4 flex items-center justify-center text-gray-500 text-xs">Avatar</div>
+                              <div>
+                                 <p class="font-bold text-gray-800">ආශා දිසානායක</p>
+                                 <div class="text-yellow-400">
+                                     <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                    </div>
+            </div>
+        </section>
+
+        <section id="booking" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-pink-50 to-purple-100/50">
+            <div class="max-w-7xl mx-auto fade-in-section">
+                <div class="text-center mb-16 md:mb-20">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 gradient-text">ඔබේ වේලාව වෙන්කර ගන්න</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">සරල පියවර කිහිපයකින් ඔබේ DMS Luxe අත්දැකීම සැලසුම් කරන්න.</p>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-12 md:gap-16 items-start">
+                    <div class="booking-form glass-effect rounded-2xl p-6 md:p-8 shadow-xl">
+                        <h3 class="text-2xl font-bold mb-6 text-gray-800">වෙන්කරවා ගැනීමේ පෝරමය</h3>
+                        <form action="#" method="POST" class="space-y-5">
+                             <div>
+                                 <label for="service" class="block text-sm font-medium text-gray-700 mb-1">සේවාව තෝරන්න</label>
+                                 <select id="service" name="service" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                                     <option>-- සේවාවක් තෝරන්න --</option>
+                                     <option>AI හිසකෙස් නිර්මාණකරණය</option>
+                                     <option>සමට ගැඹුරු සත්කාර</option>
+                                     <option>නැනෝ තාක්ෂණික වර්ණ ගැන්වීම</option>
+                                     </select>
+                             </div>
+                             <div>
+                                 <label for="stylist" class="block text-sm font-medium text-gray-700 mb-1">කැමති ශිල්පියා (විකල්ප)</label>
+                                 <select id="stylist" name="stylist" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                                     <option>-- ඕනෑම අයෙක් --</option>
+                                     <option>ශිල්පී A (Placeholder)</option>
+                                     <option>ශිල්පී B (Placeholder)</option>
+                                 </select>
+                             </div>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                 <div>
+                                     <label for="date" class="block text-sm font-medium text-gray-700 mb-1">දිනය</label>
+                                     <input type="date" id="date" name="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                                 </div>
+                                 <div>
+                                      <label for="time" class="block text-sm font-medium text-gray-700 mb-1">වේලාව</label>
+                                      <input type="time" id="time" name="time" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                                 </div>
+                             </div>
+                             <div>
+                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">නම</label>
+                                 <input type="text" id="name" name="name" placeholder="ඔබගේ නම" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                             </div>
+                             <div>
+                                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">දුරකථන අංකය</label>
+                                 <input type="tel" id="phone" name="phone" placeholder="ඔබගේ දුරකථන අංකය" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                             </div>
+                             <div>
+                                 <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:shadow-lg transform hover:scale-105 transition duration-300">
+                                     දැන් වෙන්කර ගන්න
+                                 </button>
+                             </div>
+                        </form>
+                    </div>
+
+                    <div class="booking-info space-y-8 mt-8 lg:mt-0">
+                         <h3 class="text-2xl font-bold text-gray-800 mb-4">වෙන්කරවා ගැනීමේ ක්‍රියාවලිය</h3>
+                         <div class="space-y-6 relative pl-8 border-l-2 border-pink-300 border-dashed">
+                             <div class="relative">
+                                 <div class="absolute -left-[17px] top-1 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">1</div>
+                                 <div class="ml-4 p-4 bg-white/60 rounded-lg shadow-sm backdrop-blur-sm border border-white/30">
+                                     <h4 class="font-semibold text-pink-700">පෝරමය පුරවන්න</h4>
+                                     <p class="text-sm text-gray-600">ඔබට අවශ්‍ය සේවාව, දිනය සහ වේලාව තෝරන්න.</p>
+                                 </div>
+                             </div>
+                             <div class="relative">
+                                  <div class="absolute -left-[17px] top-1 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">2</div>
+                                 <div class="ml-4 p-4 bg-white/60 rounded-lg shadow-sm backdrop-blur-sm border border-white/30">
+                                     <h4 class="font-semibold text-pink-700">තහවුරු කිරීම</h4>
+                                     <p class="text-sm text-gray-600">අපගේ කණ්ඩායම ඔබව අමතා වේලාව තහවුරු කරනු ඇත.</p>
+                                 </div>
+                             </div>
+                             <div class="relative">
+                                  <div class="absolute -left-[17px] top-1 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">3</div>
+                                 <div class="ml-4 p-4 bg-white/60 rounded-lg shadow-sm backdrop-blur-sm border border-white/30">
+                                     <h4 class="font-semibold text-pink-700">පැමිණෙන්න</h4>
+                                     <p class="text-sm text-gray-600">නියමිත දිනයේදී DMS Luxe හි සුඛෝපභෝගී අත්දැකීම විඳගන්න!</p>
+                                 </div>
+                             </div>
+                         </div>
+                         
+                         <div class="mt-10 p-6 glass-effect rounded-2xl shadow-lg">
+                            <h4 class="font-bold text-lg text-gray-800 mb-2"><i class="fas fa-info-circle text-purple-500 mr-2"></i>වැදගත් තොරතුරු</h4>
+                            <p class="text-sm text-gray-600">වෙන්කරවා ගැනීම් තහවුරු කිරීම සඳහා අප ඇමතීම අවශ්‍ය විය හැක. අවලංගු කිරීම් සඳහා කරුණාකර පැය 24 කට පෙර දැනුම් දෙන්න.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 md:py-28 px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur-md">
+             <div class="max-w-7xl mx-auto fade-in-section">
+                 <div class="text-center mb-16 md:mb-20">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 gradient-text">අපව සම්බන්ධ කරගන්න</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">ප්‍රශ්න තිබේද? නැතහොත් කතා කිරීමට අවශ්‍යද? පහත විස්තර භාවිතා කරන්න.</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12 md:gap-16">
+                    <div class="contact-form">
+                         <h3 class="text-2xl font-bold mb-6 text-gray-800">පණිවිඩයක් එවන්න</h3>
+                         <form action="#" method="POST" class="space-y-5">
+                             <div>
+                                 <label for="contact-name" class="block text-sm font-medium text-gray-700 mb-1">නම</label>
+                                 <input type="text" id="contact-name" name="contact-name" placeholder="ඔබගේ නම" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                             </div>
+                             <div>
+                                 <label for="contact-email" class="block text-sm font-medium text-gray-700 mb-1">ඊමේල් ලිපිනය</label>
+                                 <input type="email" id="contact-email" name="contact-email" placeholder="you@example.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80">
+                             </div>
+                             <div>
+                                 <label for="contact-message" class="block text-sm font-medium text-gray-700 mb-1">පණිවිඩය</label>
+                                 <textarea id="contact-message" name="contact-message" rows="4" placeholder="ඔබගේ පණිවිඩය මෙහි ලියන්න..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition bg-white/80"></textarea>
+                             </div>
+                             <div>
+                                 <button type="submit" class="w-full md:w-auto bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-lg transform hover:scale-105 transition duration-300">
+                                     පණිවිඩය යවන්න
+                                 </button>
+                             </div>
+                         </form>
+                     </div>
+                     <div class="contact-details space-y-8">
+                         <div>
+                             <h3 class="text-2xl font-bold mb-4 text-gray-800">සම්බන්ධීකරණ තොරතුරු</h3>
+                             <div class="space-y-3 text-gray-700">
+                                 <p class="flex items-center"><i class="fas fa-map-marker-alt text-pink-500 w-6 text-center mr-3"></i> <span class="font-semibold">ලිපිනය:</span> අංක 123, සුඛෝපභෝගී පාර, කොළඹ 07 (Placeholder)</p>
+                                 <p class="flex items-center"><i class="fas fa-phone-alt text-pink-500 w-6 text-center mr-3"></i> <span class="font-semibold">දුරකථන:</span> +94 11 222 3344 (Placeholder)</p>
+                                 <p class="flex items-center"><i class="fas fa-envelope text-pink-500 w-6 text-center mr-3"></i> <span class="font-semibold">ඊමේල්:</span> info@dmsluxe.lk (Placeholder)</p>
+                                  <p class="flex items-center"><i class="fas fa-clock text-pink-500 w-6 text-center mr-3"></i> <span class="font-semibold">විවෘත වේලාවන්:</span> පෙ.ව. 9:00 - ප.ව. 7:00 (සඳුදා - සෙනසුරාදා)</p>
+                             </div>
+                         </div>
+                         <div>
+                              <h3 class="text-2xl font-bold mb-4 text-gray-800">ස්ථානය</h3>
+                              <div class="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 rounded-lg shadow-md">
+                                  <span>Google Map Embed Placeholder</span>
+                              </div>
+                         </div>
+                     </div>
+                </div>
+             </div>
+        </section>
+        
+    </main>
+
+    <footer class="bg-gradient-to-r from-gray-800 via-gray-900 to-black text-gray-300 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <div class="space-y-4">
+                     <a href="#home" class="flex items-center space-x-2 group cursor-pointer">
+                         <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+                         <span class="text-xl font-bold text-white">DMS Luxe</span>
+                     </a>
+                     <p class="text-sm text-gray-400">නවීන තාක්ෂණය සහ සුඛෝපභෝගී සත්කාර සමගින් ඔබේ සුන්දරත්වය ඉහළ නංවන්න.</p>
+                </div>
+                
+                <div>
+                    <h5 class="text-lg font-semibold text-white mb-4">ඉක්මන් සබැඳි</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="hover:text-pink-400 transition text-sm">මුල් පිටුව</a></li>
+                        <li><a href="#services" class="hover:text-pink-400 transition text-sm">සේවා</a></li>
+                        <li><a href="#gallery" class="hover:text-pink-400 transition text-sm">ගැලරිය</a></li>
+                        <li><a href="#booking" class="hover:text-pink-400 transition text-sm">වෙන්කරවා ගැනීම</a></li>
+                        <li><a href="#contact" class="hover:text-pink-400 transition text-sm">සම්බන්ධ වන්න</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                     <h5 class="text-lg font-semibold text-white mb-4">සම්බන්ධ වන්න</h5>
+                     <ul class="space-y-2 text-sm">
+                        <li class="flex items-start"><i class="fas fa-map-marker-alt text-pink-400 w-4 mt-1 mr-2"></i> <span>අංක 123, සුඛෝපභෝගී පාර, කොළඹ 07 (Placeholder)</span></li>
+                        <li class="flex items-center"><i class="fas fa-phone-alt text-pink-400 w-4 mr-2"></i> <span>+94 11 222 3344 (Placeholder)</span></li>
+                         <li class="flex items-center"><i class="fas fa-envelope text-pink-400 w-4 mr-2"></i> <span>info@dmsluxe.lk (Placeholder)</span></li>
+                    </ul>
+                </div>
+
+                <div>
+                     <h5 class="text-lg font-semibold text-white mb-4">අපව අනුගමනය කරන්න</h5>
+                     <div class="flex space-x-4">
+                        <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-pink-400 transition"><i class="fab fa-facebook-f text-xl"></i></a>
+                        <a href="#" aria-label="Instagram" class="text-gray-400 hover:text-pink-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+                        <a href="#" aria-label="Twitter" class="text-gray-400 hover:text-pink-400 transition"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" aria-label="LinkedIn" class="text-gray-400 hover:text-pink-400 transition"><i class="fab fa-linkedin-in text-xl"></i></a>
+                    </div>
+                 </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-sm text-gray-500">
+                &copy; <span id="current-year"></span> DMS Luxe Salon. සියලුම හිමිකම් ඇවිරිණි. නිර්මාණය සහ සංවර්ධනය by [Your Name/Company or AI]
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- Three.js Particle System ---
+        const initThreeJS = () => {
+            const container = document.getElementById('threejs-canvas');
+            if (!container) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Particle setup
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particleCount = 7000; // Increased count slightly
+            const posArray = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10; // Spread particles more
+            }
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.01, // Smaller size
+                color: new THREE.Color('#ec4899'), // Pink color
+                transparent: true,
+                blending: THREE.AdditiveBlending, // Nice glow effect
+                depthWrite: false 
+            });
+
+            const particleMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particleMesh);
+            camera.position.z = 5;
+
+            // Mouse interaction
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            // Animation loop
+            const clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                // Subtle rotation
+                particleMesh.rotation.y = elapsedTime * 0.05;
+                
+                // Make particles react to mouse slightly
+                camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.02;
+                camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.02;
+                camera.lookAt(scene.position);
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+        
+        // --- p5.js DNA/Profile Visualization ---
+        const initP5Visualization = () => {
+             const container = document.getElementById('p5-visualization-canvas');
+             if (!container) return;
+
+             const sketch = (p) => {
+                let angle = 0;
+                let points = [];
+                const maxPoints = 150; // Limit number of points for performance
+
+                 p.setup = () => {
+                     const canvasWidth = container.offsetWidth;
+                     const canvasHeight = container.offsetHeight;
+                     p.createCanvas(canvasWidth, canvasHeight, p.WEBGL); // Use WEBGL for 3D rotation
+                     p.noFill();
+                     p.strokeWeight(1.5);
+                 };
+
+                 p.draw = () => {
+                    p.background(255, 255, 255, 0); // Transparent background
+                    p.orbitControl(); // Allows user to rotate the view
+
+                    // Dynamic color based on time/angle
+                     const r = p.map(p.sin(angle * 0.5), -1, 1, 236, 168); // pink to purple R
+                     const g = p.map(p.sin(angle * 0.5), -1, 1, 72, 85);   // pink to purple G
+                     const b = p.map(p.sin(angle * 0.5), -1, 1, 153, 247); // pink to purple B
+                     p.stroke(r, g, b, 180); // Semi-transparent stroke
+                    
+                    p.rotateY(angle * 0.2); // Rotate the whole structure
+
+                     // Generate points for a Lissajous curve (more interesting than simple helix)
+                     let currentPoint = {
+                        x: p.sin(angle * 2) * p.width * 0.3,
+                        y: p.cos(angle * 3) * p.height * 0.3,
+                        z: p.cos(angle) * p.width * 0.2
+                     };
+                    
+                    points.push(currentPoint);
+                    if(points.length > maxPoints) {
+                        points.shift(); // Remove oldest point
+                    }
+
+                    // Draw the connected line
+                     p.beginShape();
+                     for (let pt of points) {
+                         p.vertex(pt.x, pt.y, pt.z);
+                     }
+                     p.endShape();
+
+                    angle += 0.01; // Speed of animation
+                 };
+
+                 p.windowResized = () => {
+                    const canvasWidth = container.offsetWidth;
+                    const canvasHeight = container.offsetHeight;
+                     p.resizeCanvas(canvasWidth, canvasHeight);
+                 };
+             };
+
+             new p5(sketch, container); // Attach the sketch to the container div
+        };
+
+        // --- Basic Scroll Fade-in Animation ---
+        // NOTE: For more advanced animations (parallax, staggers), consider GSAP (GreenSock)
+        const initScrollAnimations = () => {
+             const sections = document.querySelectorAll('.fade-in-section');
+             if (!sections.length) return;
+
+             const observer = new IntersectionObserver((entries) => {
+                 entries.forEach(entry => {
+                     if (entry.isIntersecting) {
+                         entry.target.classList.add('is-visible');
+                         // Optional: Unobserve after animation to save resources
+                         // observer.unobserve(entry.target); 
+                     }
+                 });
+             }, {
+                 threshold: 0.1 // Trigger when 10% of the element is visible
+             });
+
+             sections.forEach(section => {
+                 observer.observe(section);
+             });
+        };
+
+        // Initialize all scripts after DOM content is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                initThreeJS();
+            } catch (e) { console.error("Three.js initialization failed:", e); }
+            
+            try {
+                initP5Visualization();
+            } catch (e) { console.error("p5.js initialization failed:", e); }
+
+            try {
+                initScrollAnimations();
+            } catch (e) { console.error("Scroll Animation initialization failed:", e); }
+
+            // Add smooth scrolling for internal links (optional enhancement)
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    // Ensure it's a valid internal link and not just "#"
+                    if (href && href.length > 1 && document.querySelector(href)) {
+                        e.preventDefault();
+                        document.querySelector(href).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
